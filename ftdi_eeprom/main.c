@@ -38,6 +38,7 @@
 #include <string.h>
 
 #include <confuse.h>
+#include <libusb.h>
 #include <ftdi.h>
 #include <ftdi_eeprom_version.h>
 
@@ -342,6 +343,7 @@ int main(int argc, char *argv[])
             }
         }
         printf ("FTDI write eeprom: %d\n", ftdi_write_eeprom(ftdi));
+        libusb_reset_device(ftdi->usb_dev);
     }
 
     // Write to file?
