@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
         CFG_STR("manufacturer", "Acme Inc.", 0),
         CFG_STR("product", "USB Serial Converter", 0),
         CFG_STR("serial", "08-15", 0),
+        CFG_INT("eeprom_type", 0x00, 0),
         CFG_STR("filename", "", 0),
         CFG_BOOL("flash_raw", cfg_false, 0),
         CFG_BOOL("high_current", cfg_false, 0),
@@ -231,12 +232,11 @@ int main(int argc, char *argv[])
     ftdi_eeprom_initdefaults (ftdi, cfg_getstr(cfg, "manufacturer"), 
                               cfg_getstr(cfg, "product"), 
                               cfg_getstr(cfg, "serial"));
-    
+
     printf("FTDI read eeprom: %d\n", ftdi_read_eeprom(ftdi));
     eeprom_get_value(ftdi, CHIP_SIZE, &my_eeprom_size);
-    // TODO: Do we know the eeprom size already?
     printf("EEPROM size: %d\n", my_eeprom_size);
-    
+
     if (_read > 0)
     {
         ftdi_eeprom_decode(ftdi, 0 /* debug: 1 */);
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
     eeprom_set_value(ftdi, USE_SERIAL, cfg_getbool(cfg, "use_serial"));
     eeprom_set_value(ftdi, USE_USB_VERSION, cfg_getbool(cfg, "change_usb_version"));
     eeprom_set_value(ftdi, USB_VERSION, cfg_getint(cfg, "usb_version"));
-
+    eeprom_set_value(ftdi, CHIP_TYPE, cfg_getint(cfg, "eeprom_type"));
 
     eeprom_set_value(ftdi, HIGH_CURRENT, cfg_getbool(cfg, "high_current"));
     eeprom_set_value(ftdi, CBUS_FUNCTION_0, str_to_cbus(cfg_getstr(cfg, "cbus0"), 13));
@@ -303,6 +303,7 @@ int main(int argc, char *argv[])
     }
 
     size_check = ftdi_eeprom_build(ftdi);
+    eeprom_get_value(ftdi, CHIP_SIZE, &my_eeprom_size);
 
     if (size_check == -1)
     {
@@ -323,9 +324,9 @@ int main(int argc, char *argv[])
         {
             if (filename != NULL && strlen(filename) > 0)
             {
-                eeprom_buf = malloc(my_eeprom_size);
+                eeprom_buf = malloc(256);
                 FILE *fp = fopen(filename, "rb");
-                fread(eeprom_buf, 1, my_eeprom_size, fp);
+                my_eeprom_size = fread(eeprom_buf, 1, 256, fp);
                 fclose(fp);
 
                 ftdi_set_eeprom_buf(ftdi, eeprom_buf, my_eeprom_size);
