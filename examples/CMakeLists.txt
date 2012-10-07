@@ -8,9 +8,6 @@ if (EXAMPLES)
 
     message(STATUS "Building example programs.")
 
-    # Source includes
-    include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src)
-
     # Targets
     add_executable(simple simple.c)
     add_executable(bitbang bitbang.c)
@@ -24,16 +21,16 @@ if (EXAMPLES)
     add_executable(eeprom eeprom.c)
 
     # Linkage
-    target_link_libraries(simple ftdi)
-    target_link_libraries(bitbang ftdi)
-    target_link_libraries(bitbang2 ftdi)
-    target_link_libraries(bitbang_cbus ftdi)
-    target_link_libraries(bitbang_ft2232 ftdi)
-    target_link_libraries(find_all ftdi)
-    target_link_libraries(serial_test ftdi)
-    target_link_libraries(baud_test ftdi)
-    target_link_libraries(stream_test ftdi)
-    target_link_libraries(eeprom ftdi)
+    target_link_libraries(simple ftdi1)
+    target_link_libraries(bitbang ftdi1)
+    target_link_libraries(bitbang2 ftdi1)
+    target_link_libraries(bitbang_cbus ftdi1)
+    target_link_libraries(bitbang_ft2232 ftdi1)
+    target_link_libraries(find_all ftdi1)
+    target_link_libraries(serial_test ftdi1)
+    target_link_libraries(baud_test ftdi1)
+    target_link_libraries(stream_test ftdi1)
+    target_link_libraries(eeprom ftdi1)
 
     # libftdi++ examples
     if(FTDI_BUILD_CPP)
@@ -46,9 +43,13 @@ if (EXAMPLES)
             add_executable(find_all_pp find_all_pp.cpp)
 
             # Linkage
-            target_link_libraries(find_all_pp ftdipp)
+            target_link_libraries(find_all_pp ftdipp1)
         endif(Boost_FOUND)
     endif(FTDI_BUILD_CPP)
+
+    # Source includes
+    include_directories(BEFORE ${CMAKE_SOURCE_DIR}/src)
+
 else(EXAMPLES)
     message(STATUS "Not building example programs.")
 endif(EXAMPLES)

@@ -16,7 +16,6 @@
 
 /*
  TODO:
-    - Remove 128 bytes limit
     - Merge Uwe's eeprom tool. Current features:
         - Init eeprom defaults based upon eeprom type
         - Read -> Already there
@@ -145,6 +144,7 @@ int main(int argc, char *argv[])
     */
     int _read = 0, _erase = 0, _flash = 0;
 
+    const int max_eeprom_size = 256;
     int my_eeprom_size = 0;
     unsigned char *eeprom_buf = NULL;
     char *filename;
@@ -334,10 +334,20 @@ int main(int argc, char *argv[])
         {
             if (filename != NULL && strlen(filename) > 0)
             {
-                eeprom_buf = malloc(256);
+                eeprom_buf = malloc(max_eeprom_size);
                 FILE *fp = fopen(filename, "rb");
-                my_eeprom_size = fread(eeprom_buf, 1, 256, fp);
+                if (fp == NULL)
+                {
+                    printf ("Can't open eeprom file %s.\n", filename);
+                    exit (-1);
+                }
+                my_eeprom_size = fread(eeprom_buf, 1, max_eeprom_size, fp);
                 fclose(fp);
+                if (my_eeprom_size < 128)
+                {
+                    printf ("Can't read eeprom file %s.\n", filename);
+                    exit (-1);
+                }
 
                 ftdi_set_eeprom_buf(ftdi, eeprom_buf, my_eeprom_size);
             }
